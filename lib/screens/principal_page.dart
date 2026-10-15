@@ -9,10 +9,15 @@ import 'estadisticas_page.dart';
 
 // Saluda al usuario, muestra el progreso del día y la lista de hábitos.
 class PrincipalPage extends StatefulWidget {
+  // Datos que recibe de la pantalla anterior a través del constructor.
+  final String nombre;
+  final int objetivo;
   final void Function(bool temaOscuro, double tamanoLetra) onCambiarAjustes;
 
   const PrincipalPage({
     super.key,
+    required this.nombre,
+    required this.objetivo,
     required this.onCambiarAjustes,
   });
 
@@ -24,8 +29,6 @@ class _PrincipalPageState extends State<PrincipalPage> {
   final _servicio = PreferenciasService();
 
   bool _cargando = true;
-  String _nombre = '';
-  int _objetivo = 1;
   bool _ocultarCompletados = false;
   List<Habito> _habitos = [];
 
@@ -36,17 +39,14 @@ class _PrincipalPageState extends State<PrincipalPage> {
   }
 
   // persistencia: leemos los datos guardados a través del servicio.
+  // El nombre y el objetivo no hace falta leerlos, llegan por el constructor.
   Future<void> _cargarDatos() async {
-    final nombre = await _servicio.leerNombre();
-    final objetivo = await _servicio.leerObjetivo();
     final ocultarCompletados = await _servicio.leerOcultarCompletados();
     final habitos = await _servicio.leerHabitos();
 
     if (!mounted) return;
 
     setState(() {
-      _nombre = nombre ?? '';
-      _objetivo = objetivo;
       _ocultarCompletados = ocultarCompletados;
       _habitos = habitos;
       _cargando = false;
@@ -76,7 +76,7 @@ class _PrincipalPageState extends State<PrincipalPage> {
       ),
     );
 
-    // null: el usuario ha cancelado o ha vuelto sin guardar.
+    // null = el usuario ha cancelado o ha vuelto sin guardar.
     if (!mounted || resultado == null) return;
 
     setState(() {
@@ -117,7 +117,7 @@ class _PrincipalPageState extends State<PrincipalPage> {
     setState(() {
       _habitos.remove(habito);
     });
-    // persistencia: guardamos la lista sin el hábito borrado.
+    // peristencia: guardamos la lista sin el hábito borrado.
     await _servicio.guardarHabitos(_habitos);
   }
 
@@ -147,8 +147,9 @@ class _PrincipalPageState extends State<PrincipalPage> {
   Widget build(BuildContext context) {
     // Indicador de carga mientras se leen los datos.
     if (_cargando) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
+      return Scaffold(
+        appBar: AppBar(title: const Text('HabitosApp')),
+        body: const Center(child: CircularProgressIndicator()),
       );
     }
 
@@ -179,11 +180,16 @@ class _PrincipalPageState extends State<PrincipalPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Hola, $_nombre',
+              'Hola, ${widget.nombre}',
               style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            Text('$completados de $_objetivo hábitos'),
+            Text('Tu objetivo diario: ${widget.objetivo} hábitos'),
+            const SizedBox(height: 4),
+            Text(
+              'Hoy llevas $completados de ${widget.objetivo} hábitos',
+              style: const TextStyle(fontSize: 18),
+            ),
             const SizedBox(height: 16),
             if (_habitos.isEmpty) const Text('Todavía no tienes hábitos.'),
             for (final habito in visibles)
