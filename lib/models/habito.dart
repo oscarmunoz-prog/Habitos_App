@@ -1,9 +1,9 @@
-// Datos de un hábito: identificador, nombre, color y fechas completadas.
+// datos de un hábito: identificador, nombre, color y fechas completadas.
 class Habito {
   final String id;
   final String nombre;
-  // El color se guarda como número
-  // Para dibujarlo usamos
+  // El color se guarda como número.
+  // Para dibujarlo usamos Color.
   final int color;
   // Días en los que se ha completado, con el formato 'aaaa-mm-dd'.
   final List<String> fechasCompletado;
@@ -14,6 +14,18 @@ class Habito {
     required this.color,
     required this.fechasCompletado,
   });
+
+  // Los tres colores que se pueden elegir y su nombre para mostrarlo.
+  static const Map<int, String> colores = {
+    0xFF2196F3: 'Azul',
+    0xFF4CAF50: 'Verde',
+    0xFFFF9800: 'Naranja',
+  };
+
+  // Nombre del color del hábito, por ejemplo 'Azul'.
+  String nombreColor() {
+    return colores[color] ?? 'Otro';
+  }
 
   // persistencia: SharedPreferences no guarda objetos, solo tipos básicos.
   // toJson convierte el hábito en un Map que después pasaremos a texto
@@ -55,7 +67,7 @@ class Habito {
     return fechasCompletado.toSet().length;
   }
 
-  // Días seguidos completados. Si hoy aún no está marcado, empezamos a
+  // días seguidos completados. Si hoy aún no está marcado, empezamos a
   // contar desde ayer, porque todavía queda día para hacerlo.
   int rachaActual() {
     var dia = DateTime.now();

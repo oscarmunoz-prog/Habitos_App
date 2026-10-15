@@ -23,6 +23,7 @@ class _InicioPageState extends State<InicioPage> {
 
   bool _cargando = true;
   String? _nombre;
+  int _objetivo = 1;
 
   @override
   void initState() {
@@ -31,8 +32,9 @@ class _InicioPageState extends State<InicioPage> {
   }
 
   Future<void> _cargarDatos() async {
-    // PERSISTENCIA: leemos el nombre y los ajustes de tema y letra.
+    // persistencia: leemos el nombre, el objetivo y los ajustes de tema y letra.
     final nombre = await _servicio.leerNombre();
+    final objetivo = await _servicio.leerObjetivo();
     final temaOscuro = await _servicio.leerTemaOscuro();
     final tamanoLetra = await _servicio.leerTamanoLetra();
 
@@ -43,6 +45,7 @@ class _InicioPageState extends State<InicioPage> {
 
     setState(() {
       _nombre = nombre;
+      _objetivo = objetivo;
       _cargando = false;
     });
   }
@@ -51,16 +54,24 @@ class _InicioPageState extends State<InicioPage> {
   Widget build(BuildContext context) {
     // Indicador de carga mientras se leen los datos.
     if (_cargando) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
+      return Scaffold(
+        appBar: AppBar(title: const Text('HabitosApp')),
+        body: const Center(child: CircularProgressIndicator()),
       );
     }
 
-    // Primera ejecución: no hay nombre guardado (getString devolvió null).
-    if (_nombre == null) {
+    final nombre = _nombre;
+
+    // Primera ejecución: no hay nombre guardado, getString devolvió null.
+    if (nombre == null) {
       return BienvenidaPage(onCambiarAjustes: widget.onCambiarAjustes);
     }
 
-    return PrincipalPage(onCambiarAjustes: widget.onCambiarAjustes);
+    // Pasamos el nombre y el objetivo al constructor de la principal.
+    return PrincipalPage(
+      nombre: nombre,
+      objetivo: _objetivo,
+      onCambiarAjustes: widget.onCambiarAjustes,
+    );
   }
 }
