@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../models/habito.dart';
 
-// Fila de la lista de hábitos: casilla para marcarlo hoy, nombre,
-// botón de editar y botón de borrar.
+// Ficha de un hábito: casilla para marcarlo hoy, icono, nombre, color,
+// estado y botones para editar y borrar.
 // Recibe desde fuera el hábito y las funciones de cada botón.
 class HabitoTile extends StatelessWidget {
   final Habito habito;
@@ -21,26 +21,61 @@ class HabitoTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      leading: Checkbox(
-        value: habito.completadoHoy(),
-        activeColor: Color(habito.color),
-        onChanged: (valor) => onMarcar(),
-      ),
-      title: Text(habito.nombre),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.circle, color: Color(habito.color)),
-          IconButton(
-            onPressed: onEditar,
-            icon: const Icon(Icons.edit),
-          ),
-          IconButton(
-            onPressed: onBorrar,
-            icon: const Icon(Icons.delete),
-          ),
-        ],
+    final color = Color(habito.color);
+    final hecho = habito.completadoHoy();
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Checkbox(
+                  value: hecho,
+                  activeColor: color,
+                  onChanged: (valor) => onMarcar(),
+                ),
+                Icon(Icons.task_alt, color: color, size: 32),
+                const SizedBox(width: 12),
+                // Expanded hace que los textos usen el espacio que queda
+                // en la fila sin salirse de la pantalla.
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        habito.nombre,
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text('Color: ${habito.nombreColor()}'),
+                      Text(hecho ? 'Completado hoy' : 'Pendiente'),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                ElevatedButton(
+                  onPressed: onEditar,
+                  child: const Text('Editar hábito'),
+                ),
+                const SizedBox(width: 8),
+                TextButton(
+                  onPressed: onBorrar,
+                  child: const Text('Borrar'),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
