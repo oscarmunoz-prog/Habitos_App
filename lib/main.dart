@@ -1,15 +1,21 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:sqflite/sqflite.dart';
+import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 
-import 'screens/inicio_page.dart';
-import 'services/preferencias_service.dart';
+import 'pantallas/inicio_page.dart';
+import 'servicios/preferencias_service.dart';
 
-// main es async porque esperamos a guardar la apertura antes de arrancar.
 Future<void> main() async {
-  // Necesario para usar shared_preferences antes de runApp.
   WidgetsFlutterBinding.ensureInitialized();
 
-  // PERSISTENCIA: main se ejecuta una vez cada vez que se abre la app
-  // (en el navegador, cada vez que se refresca la página).
+  // sqflite funciona directamente en Android e iOS. En el navegador
+  // (kIsWeb) necesita esta versión especial para web.
+  if (kIsWeb) {
+    databaseFactory = databaseFactoryFfiWeb;
+  }
+
+  // PERSISTENCIA: main se ejecuta una vez cada vez que se abre la app.
   await PreferenciasService().registrarApertura();
 
   runApp(const MyApp());
@@ -40,7 +46,11 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'HabitosApp',
-      theme: _temaOscuro ? ThemeData.dark() : ThemeData.light(),
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        colorSchemeSeed: Colors.teal,
+        brightness: _temaOscuro ? Brightness.dark : Brightness.light,
+      ),
       // builder envuelve todas las pantallas: así el tamaño de letra
       // se aplica a los textos de toda la app.
       builder: (context, child) {
